@@ -4,13 +4,19 @@ This repository is home to the nix code that builds my systems.
 
 ```
 ├── hosts
-│   └── <name>
-│       ├── configuration.nix
-│       └── hardware-configuration.nix
+│   ├── <name>
+│   │   ├── configuration.nix
+│   │   ├── default.nix
+│   │   └── hardware-configuration.nix
+│   └── common.nix
 ├── modules
-│   └── modules
-│       └── hardware
-│           └── mac-mini-6.2.nix
+│   ├── hardware
+│   │   ├── mac-mini-6.2.nix
+│   │   └── nvidia-rtx.nix
+│   ├── roles
+│   │   └── desktop.nix
+│   └── services
+│       └── xserver.nix
 ├── flake.lock
 └── flake.nix
 ```

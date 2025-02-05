@@ -17,6 +17,13 @@
     system = "x86_64-linux";
   in {
     nixosConfigurations = {
+      ganymede = nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules = [
+          ./hosts/ganymede
+          ./system
+        ];
+      };
       supervisor = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
