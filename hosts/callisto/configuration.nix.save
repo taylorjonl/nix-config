@@ -30,17 +30,14 @@
     };
   };
 
+  # https://xeiaso.net/blog/prometheus-grafana-loki-nixos-2020-11-20/
+
   services = {
     grafana = {
       enable = true;
-      settings = {
-        server = {
-          http_addr = "0.0.0.0";
-          http_port = 3000;
-          protocol = "http";
-          domain = "localhost";
-        };
-      };
+      domain = ".pele";
+      port = 3000;
+      addr = "0.0.0.0";
     };
     openssh = {
       enable = true;
@@ -58,11 +55,10 @@
       settings = {
         PasswordAuthentication = true;
         PermitRootLogin = "no";
-      };
     };
     prometheus = {
       enable = true;
-      port = 9090;
+      port = 9001;
       exporters = {
         node = {
           enable = true;
@@ -70,28 +66,6 @@
           port = 9100;
         };
       };
-      globalConfig = {
-        scrape_interval = "15s";
-        evaluation_interval = "15s";
-      };
-      scrapeConfigs = [
-        {
-          job_name = "node";
-          static_configs = [
-            {
-              targets = [ "callisto:9100" ];
-            }
-          ];
-          relabel_configs = [
-            {
-              source_labels = [ "__address__" ];
-              target_label = "instance";
-              regex = "(.+):9100";
-              replacement = "\${1}";
-            }
-          ];
-        }
-      ];
     };
   };
 

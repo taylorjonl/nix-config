@@ -7,7 +7,9 @@
   environment.persistence."/persist" = {
     hideMounts = true;
     directories = [
+      "/var/lib/grafana"
       "/var/lib/nixos"
+      "/var/lib/prometheus2"
       "/var/log"
     ];
     files = [
