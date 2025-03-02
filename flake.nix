@@ -17,18 +17,18 @@
     system = "x86_64-linux";
   in {
     nixosConfigurations = {
+      callisto = nixpkgs.lib.nixosSystem {
+        inherit system;
+        modules = [
+          impermanence.nixosModules.impermanence
+          ./hosts/callisto
+          ./system
+        ];
+      };
       ganymede = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
           ./hosts/ganymede
-          ./system
-        ];
-      };
-      supervisor = nixpkgs.lib.nixosSystem {
-        inherit system;
-        modules = [
-          impermanence.nixosModules.impermanence
-          ./hosts/supervisor
           ./system
         ];
       };
