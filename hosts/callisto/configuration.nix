@@ -30,6 +30,18 @@
     };
   };
 
+  security.acme = {
+    acceptTerms = true;
+    defaults.email = "taylorjonl@gmail.com";
+    certs."home.theoverengineer.io" = {
+      domain = "home.theoverengineer.io";
+      extraDomainNames = [ "*.home.theoverengineer.io" ];
+      dnsProvider = "cloudflare";
+      dnsPropagationCheck = true;
+      credentialsFile = "/persist/secrets/credentials.txt";
+    };
+  };
+
   services = {
     grafana = {
       enable = true;
@@ -95,15 +107,53 @@
     };
     traefik = {
       enable = true;
-      dynamicConfigOptions = {
-        http.routers."grafana.home.theoverengineer.io" = {
-          rule = "Host(`grafana.home.theoverengineer.io`)";
-          service = "grafana";
+      staticConfigOptions = {
+        global = {
+          checkNewVersion = false;
+          sendAnonymousUsage = false;
         };
-        http.services."grafana" = {
-          loadBalancer.servers = [
-            {
+        entryPoints = {
+          web = {
+            address = ":80";
+            http.redirections.entrypoint = {
+              to = "websecure";
+              scheme = "https";
+            };
+          };
+          websecure.address = ":443";
+        };
+        providers.docker.exposedByDefault = false;
+      };
+      dynamicConfigOptions = {
+        http.routers.grafana = {
+          rule = "Host(`grafana.home.theoverengineer.io`)";
+          entryPoints = [ "websecure" ];
+          service = "grafana";
+          tls = {
+            domains = {
+              main = [ "home.theoverengineer.io" ];
+              sans = [ "*.home.theoverengineer.io" ];
+            };
+          };
+        };
+        http.services.grafana = {
+          loadBalancer.servers = [{
               url = "http://127.0.0.1:3000";
+          }];
+        };
+        tls = {
+          stores.default = {
+            defaultCertificate = {
+              certFile = "/var/lib/acme/home.theoverengineer.io/cert.pem";
+              keyFile = "/var/lib/acme/home.theoverengineer.io/key.pem";
+            };
+          };
+
+          certificates = [
+            {
+              certFile = "/var/lib/acme/home.theoverengineer.io/cert.pem";
+              keyFile = "/var/lib/acme/home.theoverengineer.io/key.pem";
+              stores = "default";
             }
           ];
         };
@@ -121,6 +171,7 @@
     #  tree
     #];
   };
+  users.users.traefik.extraGroups = [ "docker" "acme" ];
 
   virtualisation = {
     docker = {
