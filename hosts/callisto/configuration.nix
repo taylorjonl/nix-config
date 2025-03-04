@@ -89,19 +89,15 @@
       scrapeConfigs = [
         {
           job_name = "node";
-          static_configs = [
-            {
-              targets = [ "callisto:9100" ];
-            }
-          ];
-          relabel_configs = [
-            {
-              source_labels = [ "__address__" ];
-              target_label = "instance";
-              regex = "(.+):9100";
-              replacement = "\${1}";
-            }
-          ];
+          static_configs = [{
+            targets = [ "callisto:9100" ];
+          }];
+          relabel_configs = [{
+            source_labels = [ "__address__" ];
+            target_label = "instance";
+            regex = "(.+):9100";
+            replacement = "\${1}";
+          }];
         }
       ];
     };
