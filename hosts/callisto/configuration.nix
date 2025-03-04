@@ -21,7 +21,7 @@
   networking = {
     firewall = {
       enable = true;
-      allowedTCPPorts = [ 3000 ];
+      allowedTCPPorts = [ 80 443 ];
     };
     hostId = "1bc05b34";
     hostName = "callisto";
@@ -35,10 +35,10 @@
       enable = true;
       settings = {
         server = {
-          http_addr = "0.0.0.0";
+          domain = "grafana.home.theoverengineer.io";
+          http_addr = "127.0.0.1";
           http_port = 3000;
           protocol = "http";
-          domain = "localhost";
         };
       };
     };
@@ -92,6 +92,22 @@
           ];
         }
       ];
+    };
+    traefik = {
+      enable = true;
+      dynamicConfigOptions = {
+        http.routers."grafana.home.theoverengineer.io" = {
+          rule = "Host(`grafana.home.theoverengineer.io`)";
+          service = "grafana";
+        };
+        http.services."grafana" = {
+          loadBalancer.servers = [
+            {
+              url = "http://127.0.0.1:3000";
+            }
+          ];
+        };
+      };
     };
   };
 
