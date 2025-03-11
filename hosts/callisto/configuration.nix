@@ -43,17 +43,6 @@
   };
 
   services = {
-    grafana = {
-      enable = true;
-      settings = {
-        server = {
-          domain = "grafana.home.theoverengineer.io";
-          http_addr = "127.0.0.1";
-          http_port = 3000;
-          protocol = "http";
-        };
-      };
-    };
     openssh = {
       enable = true;
       hostKeys = [
@@ -72,41 +61,17 @@
         PermitRootLogin = "no";
       };
     };
-    prometheus = {
-      enable = true;
-      port = 9090;
-      exporters = {
-        node = {
-          enable = true;
-          enabledCollectors = [ "systemd" ];
-          port = 9100;
-        };
-      };
-      globalConfig = {
-        scrape_interval = "15s";
-        evaluation_interval = "15s";
-      };
-      scrapeConfigs = [
-        {
-          job_name = "node";
-          static_configs = [{
-            targets = [ "callisto:9100" ];
-          }];
-          relabel_configs = [{
-            source_labels = [ "__address__" ];
-            target_label = "instance";
-            regex = "(.+):9100";
-            replacement = "\${1}";
-          }];
-        }
-      ];
-    };
     traefik = {
       enable = true;
       staticConfigOptions = {
         global = {
           checkNewVersion = false;
           sendAnonymousUsage = false;
+        };
+        log = {
+          level = "DEBUG";
+          filePath = "${config.services.traefik.dataDir}/traefik.log";
+          format = "json";
         };
         entryPoints = {
           web = {
@@ -121,22 +86,6 @@
         providers.docker.exposedByDefault = false;
       };
       dynamicConfigOptions = {
-        http.routers.grafana = {
-          rule = "Host(`grafana.home.theoverengineer.io`)";
-          entryPoints = [ "websecure" ];
-          service = "grafana";
-          tls = {
-            domains = {
-              main = [ "home.theoverengineer.io" ];
-              sans = [ "*.home.theoverengineer.io" ];
-            };
-          };
-        };
-        http.services.grafana = {
-          loadBalancer.servers = [{
-              url = "http://127.0.0.1:3000";
-          }];
-        };
         tls = {
           stores.default = {
             defaultCertificate = {
