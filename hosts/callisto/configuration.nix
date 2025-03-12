@@ -11,6 +11,18 @@
   boot.loader.efi.canTouchEfiVariables = true;
   boot.tmp.useTmpfs = true;
 
+  environment.persistence."/persist" = {
+    hideMounts = true;
+    directories = [
+      "/var/lib/nixos"
+      "/var/lib/traefik"
+      "/var/log"
+    ];
+    files = [
+      "/etc/machine-id"
+    ];
+  };
+
   # List packages installed in system profile. To search, run:
   # $ nix search wget
   environment.systemPackages = with pkgs; [
@@ -27,18 +39,6 @@
     hostName = "callisto";
     interfaces = {
       enp1s0f0.useDHCP = lib.mkDefault true;
-    };
-  };
-
-  security.acme = {
-    acceptTerms = true;
-    defaults.email = "taylorjonl@gmail.com";
-    certs."home.theoverengineer.io" = {
-      domain = "home.theoverengineer.io";
-      extraDomainNames = [ "*.home.theoverengineer.io" ];
-      dnsProvider = "cloudflare";
-      dnsPropagationCheck = true;
-      credentialsFile = "/persist/secrets/credentials.txt";
     };
   };
 
@@ -70,7 +70,7 @@
         };
         log = {
           level = "DEBUG";
-          filePath = "${config.services.traefik.dataDir}/traefik.log";
+          filePath = "/var/lib/traefik/traefik.log";
           format = "json";
         };
         entryPoints = {
@@ -83,27 +83,21 @@
           };
           websecure.address = ":443";
         };
+        certificatesResolvers.cloudflare.acme = {
+          email = "taylorjonl@gmail.com";
+          storage = "/var/lib/traefik/acme.json";
+          dnsChallenge = {
+            provider = "cloudflare";
+            resolvers = [ "1.1.1.1:53" "1.0.0.1:53" ];
+          };
+        };
         providers.docker.exposedByDefault = false;
       };
-      dynamicConfigOptions = {
-        tls = {
-          stores.default = {
-            defaultCertificate = {
-              certFile = "/var/lib/acme/home.theoverengineer.io/cert.pem";
-              keyFile = "/var/lib/acme/home.theoverengineer.io/key.pem";
-            };
-          };
-
-          certificates = [
-            {
-              certFile = "/var/lib/acme/home.theoverengineer.io/cert.pem";
-              keyFile = "/var/lib/acme/home.theoverengineer.io/key.pem";
-              stores = "default";
-            }
-          ];
-        };
-      };
     };
+  };
+
+  systemd.services.traefik.environment = {
+    CF_DNS_API_TOKEN_FILE = "/persist/secrets/cloudflare.txt";
   };
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
@@ -116,7 +110,7 @@
     #  tree
     #];
   };
-  users.users.traefik.extraGroups = [ "docker" "acme" ];
+  users.users.traefik.extraGroups = [ "docker" ];
 
   virtualisation = {
     docker = {

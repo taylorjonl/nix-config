@@ -4,20 +4,6 @@
     #impermanence.nixosModules.impermanence
   ];
 
-  environment.persistence."/persist" = {
-    hideMounts = true;
-    directories = [
-      "/var/lib/acme"
-      "/var/lib/grafana"
-      "/var/lib/nixos"
-      "/var/lib/prometheus2"
-      "/var/log"
-    ];
-    files = [
-      "/etc/machine-id"
-    ];
-  };
-
   boot.initrd.postResumeCommands = lib.mkAfter ''
     zfs rollback -r tank/transient/rootfs@fresh
   '';
