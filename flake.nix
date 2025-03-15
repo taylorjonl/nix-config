@@ -2,7 +2,7 @@
   description = "A simple NixOS flake";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-24.11";
     impermanence.url = "github:nix-community/impermanence";
 
     # use ssh protocol to authenticate via ssh-agent/ssh-key, and shallow clone to save time
